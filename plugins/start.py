@@ -6,10 +6,14 @@ from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 import humanize
 from helper.progress import humanbytes
-from helper.database import insert, find_one, used_limit, usertype, uploadlimit, addpredata, total_rename, total_size, usertype, backpre
+from helper.database import (
+    insert, find_one, used_limit, usertype,
+    uploadlimit, addpredata, total_rename, total_size,
+    usertype, backpre, daily as daily_
+)
 from pyrogram.file_id import FileId
-from helper.database import daily as daily_
-from helper.date import add_date, check_expi
+from helper.date import check_expi
+
 import datetime
 from datetime import date as date_
 
@@ -25,10 +29,8 @@ mongo = pymongo.MongoClient(DB_URL)
 db = mongo[DB_NAME]
 dbcol = db["promo"]
 
-
 def profind(id):
     return dbcol.find_one({"_id": id})
-
 
 # Part of Day --------------------
 currentTime = datetime.datetime.now()
@@ -67,6 +69,7 @@ async def start(client, message):
             await message.reply_text("You Can Use Now ")
             uploadlimit(int(user_id), 10737418240)
             usertype(int(user_id), "NORMAL")
+            return  # Added return statement
 
 @Client.on_message(filters.private & (filters.document | filters.audio | filters.video))
 async def send_doc(client, message):
@@ -120,8 +123,7 @@ async def send_doc(client, message):
         await message.reply_text(f"```Sorry Dude I am not only for YOU \n Flood control is active so please wait for {ltime}```",
                                  reply_to_message_id=message.id)
     else:
-        # Corrected indentation for these lines
-        await client.forward_messages(log_channel, message.from_user.id, message.id)
+        await client.forward_messages(log_channel, message.from_user.id, message.id)  # Corrected indentation
         await client.send_message(log_channel, f"User Id :- {user_id}")
 
         media = await client.get_messages(message.chat.id, message.id)
